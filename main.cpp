@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include <cstdio>
+#include <time.h>
 
 int main(int argc, char** argv)
 {
@@ -8,7 +9,15 @@ int main(int argc, char** argv)
         struct stat file_stat;
         stat(argv[1], &file_stat);
 
-        printf("File times, access:%d modification:%d status:%d\n", file_stat.st_atime, file_stat.st_mtime, file_stat.st_ctime);
+        //file_stat.st_mtime seems to be what we want to use!
+
+        printf("File times\n");
+        printf("Access:%d,", file_stat.st_atime);
+        printf("%s", ctime(&file_stat.st_atime));
+        printf("Modification:%d,", file_stat.st_mtime);
+        printf("%s", ctime(&file_stat.st_mtime));
+        printf("Status:%d,", file_stat.st_ctime);
+        printf("%s", ctime(&file_stat.st_ctime));
     }
     return 0;
 }
