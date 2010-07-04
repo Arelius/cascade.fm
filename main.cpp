@@ -2,12 +2,12 @@
 #include <cstdio>
 #include <time.h>
 
-int main(int argc, char** argv)
+int wmain(int argc, wchar_t** argv)
 {
     if(argc == 2)
     {
-        struct stat file_stat;
-        stat(argv[1], &file_stat);
+        struct _stat file_stat;
+        _wstat(argv[1], &file_stat);
 
         // file_stat.st_mtime seems to be what we want to use!
         // for directories st_mtime gets updated when files get added,
