@@ -9,7 +9,9 @@ int main(int argc, char** argv)
         struct stat file_stat;
         stat(argv[1], &file_stat);
 
-        //file_stat.st_mtime seems to be what we want to use!
+        // file_stat.st_mtime seems to be what we want to use!
+        // for directories st_mtime gets updated when files get added,
+        // not when files are updated.
 
         printf("File times\n");
         printf("Access:%d,", file_stat.st_atime);
