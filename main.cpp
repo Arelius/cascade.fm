@@ -9,11 +9,14 @@ int wmain(int argc, wchar_t** argv)
     {
         sys_dir_file* dir = sys_first_file(argv[1]);
         
-        do
+        if(dir)
         {
-            wprintf(L"File %s Modified on: %I64u\n", sys_file_name(dir), sys_mod_time(dir));
+            do
+            {
+                wprintf(L"File %s Modified on: %I64u\n", sys_file_name(dir), sys_mod_time(dir));
+            }
+            while(sys_next_file(dir));
         }
-        while(sys_next_file(dir));
         sys_close_dir(dir);
     }
     return 0;
