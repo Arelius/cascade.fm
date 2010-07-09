@@ -1,3 +1,4 @@
+#include "quick_string.h"
 #include "sys.h"
 #include <assert.h>
 
@@ -9,8 +10,13 @@ struct sys_dir_file
 
 sys_dir_file* sys_first_file(wchar_t* dir)
 {
+
+    QuickString<MAX_PATH> tmp_dir;
+    tmp_dir.append_string(dir);
+    tmp_dir.append_string(L"\\*");
+
     sys_dir_file* ret = new sys_dir_file();
-    ret->hand = FindFirstFileExW(dir,
+    ret->hand = FindFirstFileExW(tmp_dir.utf_16(),
                                  FindExInfoStandard, // FindExInfoBasic on windows 7 to not return cAlternateFileName
                                  &ret->find,
                                  FindExSearchNameMatch,

@@ -1,1 +1,3 @@
-Main cascade : main.cpp sys_win32.cpp ; 
+LINKFLAGS += user32.lib ;
+
+Main cascade : main.cpp sys_win32.cpp utf_16.cpp ; 
