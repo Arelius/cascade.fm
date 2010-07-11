@@ -7,6 +7,18 @@ wchar* char_next(wchar* str)
     return CharNextW(str);
 }
 
+size_t str_byte_length(const wchar* str)
+{
+    return wcslen(str);
+}
+
+// returns a pointer to the null termination character.
+wchar* str_copy(wchar* dest, const wchar* src)
+{
+    wcscpy(dest, src);
+    return dest + wcslen(src);
+}
+
 size_t char_length(const wchar* str)
 {
     return CharNextW(str) - str;
