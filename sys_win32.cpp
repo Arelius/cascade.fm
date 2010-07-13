@@ -14,14 +14,9 @@ void sys_fill_path(sys_dir_file* dir)
 {
     if(dir->full_path)
         delete dir->full_path;
-    dir->full_path = new wchar[str_byte_length(dir->dir) +
-                               str_byte_length(dir->find.cFileName) +
-                               str_byte_length(L"\\") +
-                               char_term_len];
-    wchar* dest = dir->full_path;
-    dest = str_copy(dest, dir->dir);
-    dest = str_copy(dest, L"\\");
-    dest = str_copy(dest, dir->find.cFileName);
+    dir->full_path = new wchar[4096];
+    DWORD success = GetFullPathNameW(dir->find.cFileName, 4096, dir->full_path, NULL);
+    assert(success); // Not sure what could cause this.
 }
 
 sys_dir_file* sys_first_file(wchar_t* dir)
