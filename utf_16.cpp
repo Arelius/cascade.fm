@@ -19,6 +19,11 @@ wchar* str_copy(wchar* dest, const wchar* src)
     return dest + wcslen(src);
 }
 
+int str_compare(const wchar* str1, const wchar* str2)
+{
+    return wcscmp(str1, str2);
+}
+
 size_t char_length(const wchar* str)
 {
     return CharNextW(str) - str;

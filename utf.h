@@ -1,3 +1,6 @@
+#ifndef _UTF_H_
+#define _UTH_H_
+
 typedef wchar_t wchar;
 
 // Is this right?
@@ -8,9 +11,11 @@ wchar* char_next(wchar* str);
 size_t char_length(const wchar* str);
 size_t str_byte_length(const wchar* str);
 wchar* str_copy(wchar* dest, const wchar* src);
+int str_compare(const wchar* str1, const wchar* str2);
 void char_copy(wchar* dest, const wchar* src);
 bool char_eos(const wchar* str);
 void char_inc(const wchar** str);
 bool char_is_alpha(const wchar* c);
 bool char_is_upper(const wchar* c);
 bool char_is_lower(const wchar* c);
+#endif //_UTF_H_
