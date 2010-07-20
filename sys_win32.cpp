@@ -19,7 +19,7 @@ void sys_fill_path(sys_dir_file* dir)
     assert(success); // Not sure what could cause this.
 }
 
-sys_dir_file* sys_first_file(wchar_t* dir)
+sys_dir_file* sys_first_file(const wchar_t* dir)
 {
     QuickString<MAX_PATH> tmp_dir;
     tmp_dir.append_string(dir);
@@ -83,4 +83,9 @@ const wchar_t* sys_file_name(sys_dir_file* dir)
 {
     assert(dir);
     return dir->full_path;
+}
+
+bool sys_file_exists(const wchar_t* file)
+{
+    return GetFileAttributesW(file) != 0xFFFFFFFF;
 }

@@ -31,7 +31,7 @@ size_t char_length(const wchar* str)
 
 void char_copy(wchar* dest, const wchar* src)
 {
-    memcpy(dest, src, char_length(src));
+    lstrcpynW(dest, src, 2);
 }
 
 bool char_eos(const wchar* str)

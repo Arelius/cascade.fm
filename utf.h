@@ -1,5 +1,5 @@
 #ifndef _UTF_H_
-#define _UTH_H_
+#define _UTF_H_
 
 typedef wchar_t wchar;
 

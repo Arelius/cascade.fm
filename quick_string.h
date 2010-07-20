@@ -34,7 +34,7 @@ public:
         wchar* tmp = new wchar[new_alloc];
         memcpy(tmp, str, (end-str)+1);;
 
-        max = tmp + new_alloc;
+        max = tmp + new_alloc-1;
         end = tmp + (end - str);
     
         if(str != buffer)
@@ -58,5 +58,10 @@ public:
         }
 
         *end = char_termination;
+    }
+
+    void clear()
+    {
+        end = str;
     }
 };
