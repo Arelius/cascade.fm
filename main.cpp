@@ -1,5 +1,6 @@
 #include "sys.h"
 #include "command_line.h"
+#include "database.h"
 
 #include <sys/stat.h>
 #include <cstdio>
@@ -53,10 +54,13 @@ void set_cmd_info(const wchar* command,
 
 int cmd_init(int argc, wchar_t** argv)
 {
+    database* db = db_open(argc == 1 ? argv[0] : NULL);
+    db_init(db);
+    db_close(db);
     return 0;
 }
 
-COMMAND_INFO(init, 0, 0,
+COMMAND_INFO(init, 0, 1,
              L"Initializes local databases.",
              L"init\n Takes no params.")
 

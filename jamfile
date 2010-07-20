@@ -1,3 +1,3 @@
-LINKFLAGS += user32.lib ;
+LINKFLAGS += user32.lib shell32.lib ;
 
-Main cascade : main.cpp sys_win32.cpp utf_16.cpp command_line.cpp ext/sqlite3.c ; 
+Main cascade : main.cpp sys_win32.cpp utf_16.cpp command_line.cpp database.cpp ext/sqlite3.c ; 

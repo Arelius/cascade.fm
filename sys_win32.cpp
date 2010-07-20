@@ -1,6 +1,8 @@
 #include "quick_string.h"
 #include "sys.h"
+
 #include <assert.h>
+#include <shlobj.h>
 
 struct sys_dir_file
 {
@@ -88,4 +90,9 @@ const wchar_t* sys_file_name(sys_dir_file* dir)
 bool sys_file_exists(const wchar_t* file)
 {
     return GetFileAttributesW(file) != 0xFFFFFFFF;
+}
+
+bool sys_make_path(const wchar_t* path)
+{
+    return SHCreateDirectoryExW(NULL, path, NULL) == ERROR_SUCCESS;
 }
