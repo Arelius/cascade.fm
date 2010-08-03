@@ -24,7 +24,13 @@ struct database
 {
     sqlite3* db;
     sqlite3_stmt* add_file_status_stmt;
+    sqlite3_stmt* check_file_status_stmt;
 };
+
+void db_dump_error(database* db)
+{
+    wprintf(L"%s\n", (wchar*)sqlite3_errmsg16(db->db));
+}
 
 // Just try to open and then close it to test.
 bool db_exists(const wchar* db_file)
@@ -84,13 +90,26 @@ database* db_open(const wchar* db_file)
                  (const wchar*)sqlite3_errmsg16(sdb));
         return NULL;
     }
-    
+
     db->db = sdb;
+
+    // Could do this later to avoid the case it's never used.
+
+    sqlite3_prepare16(db->db,
+                      L"SELECT file_name, modified from file_status where file_name == ?;",
+                      -1, &db->check_file_status_stmt, NULL);
+
+    sqlite3_prepare16(db->db,
+                      L"INSERT OR REPLACE INTO file_status (file_name, hash, modified, scanned) VALUES (?, ?, ?, ?);",
+                      -1, &db->add_file_status_stmt, NULL);
+    
     return db;
 }
 
 void db_close(database* db)
 {
+    sqlite3_finalize(db->add_file_status_stmt);
+    sqlite3_finalize(db->check_file_status_stmt);
     sqlite3_close(db->db);
     delete db;
 }
@@ -173,3 +192,55 @@ void db_print_search_dir(database* db, void (*print)(const wchar* dir, void* UP)
     assert(err == SQLITE_DONE);
 }
 
+void db_inject_library_directories(database* db)
+{
+    sqlite3_stmt* statement;
+
+    int err = sqlite3_prepare16(db->db,
+                                L"INSERT OR IGNORE INTO file_status (filename, hash, modified, scanned) SELECT directory, NULL, NULL, 0 from search_directories;",
+                                -1, &statement, NULL);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(statement);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_finalize(statement);
+}
+
+void db_add_local_file(database* db, const wchar* file, time64 time)
+{
+    int err = sqlite3_bind_text16(db->check_file_status_stmt, 1, file, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->check_file_status_stmt);
+    
+    if(err == SQLITE_ROW)
+    {
+        if(sqlite3_column_int64(db->check_file_status_stmt, 1) == time)
+        {
+            sqlite3_reset(db->check_file_status_stmt);
+            return;
+        }
+    }
+    
+    // Unique constraint ensure only one result.
+    err = sqlite3_step(db->check_file_status_stmt);
+    assert(err == SQLITE_DONE);
+    sqlite3_reset(db->check_file_status_stmt);
+
+    // Add it newly to the db, if a differen't time exists.
+
+    err = sqlite3_bind_text16(db->add_file_status_stmt, 1, file, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+    err = sqlite3_bind_null(db->add_file_status_stmt, 2);
+    assert(err == SQLITE_OK);
+    err = sqlite3_bind_int64(db->add_file_status_stmt, 3, time);
+    assert(err == SQLITE_OK);
+    err = sqlite3_bind_int(db->add_file_status_stmt, 4, 0);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->add_file_status_stmt);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->add_file_status_stmt);
+}
