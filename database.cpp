@@ -85,15 +85,79 @@ void db_close(database* db)
     sqlite3_close(db);
 }
 
-void db_init(database* db)
+void db_run_schema(database* db, const wchar* schema)
 {
     sqlite3_stmt* statement;
 
-    int err = sqlite3_prepare16(db, search_dir_schema, -1, &statement, NULL);
+    int err = sqlite3_prepare16(db, schema, -1, &statement, NULL);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(statement);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_finalize(statement);    
+}
+
+void db_init(database* db)
+{
+    db_run_schema(db, search_dir_schema);
+}
+
+void db_add_search_dir(database* db, const wchar* dir)
+{
+    sqlite3_stmt* statement;
+
+    int err = sqlite3_prepare16(db,
+                                L"Insert into search_directories VALUES(?);",
+                                -1, &statement, NULL);
+    
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_bind_text16(statement, 1, dir, -1, SQLITE_TRANSIENT);
     assert(err == SQLITE_OK);
 
     err = sqlite3_step(statement);
     assert(err == SQLITE_DONE);
 
     sqlite3_finalize(statement);
+}
+
+int db_rm_search_dir(database* db, const wchar* dir)
+{
+    sqlite3_stmt* statement;
+    
+    int err = sqlite3_prepare16(db,
+                                L"Delete from search_directories where directory GLOB ?;",
+                                -1, &statement, NULL);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_bind_text16(statement, 1, dir, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(statement);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_finalize(statement);
+
+    return sqlite3_changes(db);
+}
+
+void db_print_search_dir(database* db, void (*print)(const wchar* dir, void* UP), void* UP)
+{
+    sqlite3_stmt* statement;
+
+    int err = sqlite3_prepare16(db,
+                                L"Select directory from search_directories;",
+                                -1, &statement, NULL);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(statement);
+
+    while(err == SQLITE_ROW)
+    {
+        wchar* dir = (wchar*)sqlite3_column_text16(statement, 0);
+        print(dir, UP);
+        err = sqlite3_step(statement);
+    }
+    assert(err == SQLITE_DONE);
 }
