@@ -11,5 +11,6 @@ bool sys_next_file(sys_dir_file* dir);
 time64 sys_mod_time(sys_dir_file* dir);
 // Not valid after sys_next_file.
 const wchar_t* sys_file_name(sys_dir_file* dir);
+bool sys_is_directory(sys_dir_file* dir);
 bool sys_file_exists(const wchar_t* file);
 bool sys_make_path(const wchar_t* path);

@@ -2,29 +2,40 @@
 #include "quick_string.h"
 #include "ext/sqlite3.h"
 #include "sys.h"
+#include "utf.h"
 
 #include <assert.h>
 #include <direct.h>
 #include <shlobj.h>
 
 const wchar* db_file_name = L"music.cas";
-const wchar* db_app_data = L"\\Cascade\\0.1\\";
+const wchar* db_app_data = L"\\Cascade\\";
 
 const wchar* search_dir_schema =
     L"CREATE TABLE search_directories (directory TEXT UNIQUE);";
 
 const wchar* file_status_schema =
-    L"CREATE TABLE file_status (filename TEXT UNIQUE, hash TEXT, modified INTEGER, scanned INTEGER);"; 
+    L"CREATE TABLE file_status (filename TEXT UNIQUE, hash_id TEXT, modified INTEGER);"; 
+
+const wchar* dir_scan_schema =
+    L"CREATE TABLE scan_directories (directory TEXT UNIQUE);";
 
 const wchar* song_info_schema =
-    L"CREATE TABLE song_info (hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally);";
+    L"CREATE TABLE song_info (id UNIQUE PRIMARY KEY, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally);";
 
 // These should be stored in the database object.
 struct database
 {
     sqlite3* db;
+
+    // db: file_status
     sqlite3_stmt* add_file_status_stmt;
     sqlite3_stmt* check_file_status_stmt;
+
+    // db: scan_directories
+    sqlite3_stmt* add_scan_dir_stmt;
+    sqlite3_stmt* rm_scan_dir_stmt;
+    sqlite3_stmt* check_scan_dir_stmt;
 };
 
 void db_dump_error(database* db)
@@ -95,14 +106,26 @@ database* db_open(const wchar* db_file)
 
     // Could do this later to avoid the case it's never used.
 
-    sqlite3_prepare16(db->db,
-                      L"SELECT file_name, modified from file_status where file_name == ?;",
-                      -1, &db->check_file_status_stmt, NULL);
+    err = sqlite3_prepare16(db->db,
+                            L"SELECT filename, modified from file_status where filename == ?;",
+                            -1, &db->check_file_status_stmt, NULL);
 
-    sqlite3_prepare16(db->db,
-                      L"INSERT OR REPLACE INTO file_status (file_name, hash, modified, scanned) VALUES (?, ?, ?, ?);",
-                      -1, &db->add_file_status_stmt, NULL);
-    
+    err = sqlite3_prepare16(db->db,
+                            L"INSERT OR REPLACE INTO file_status (filename, hash_id, modified) VALUES (?, ?, ?);",
+                            -1, &db->add_file_status_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"INSERT OR IGNORE INTO scan_directories (directory) VALUES (?);",
+                            -1, &db->add_scan_dir_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"DELETE FROM scan_directories where directory = ?;",
+                            -1, &db->rm_scan_dir_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"SELECT directory from scan_directories;",
+                            -1, &db->check_scan_dir_stmt, NULL);
+
     return db;
 }
 
@@ -131,6 +154,7 @@ void db_init(database* db)
 {
     db_run_schema(db, search_dir_schema);
     db_run_schema(db, file_status_schema);
+    db_run_schema(db, dir_scan_schema);
 }
 
 void db_add_search_dir(database* db, const wchar* dir)
@@ -197,7 +221,7 @@ void db_inject_library_directories(database* db)
     sqlite3_stmt* statement;
 
     int err = sqlite3_prepare16(db->db,
-                                L"INSERT OR IGNORE INTO file_status (filename, hash, modified, scanned) SELECT directory, NULL, NULL, 0 from search_directories;",
+                                L"INSERT OR IGNORE INTO scan_directories (directory) SELECT directory from search_directories;",
                                 -1, &statement, NULL);
     assert(err == SQLITE_OK);
 
@@ -221,10 +245,10 @@ void db_add_local_file(database* db, const wchar* file, time64 time)
             sqlite3_reset(db->check_file_status_stmt);
             return;
         }
+        err = sqlite3_step(db->check_file_status_stmt);
     }
     
     // Unique constraint ensure only one result.
-    err = sqlite3_step(db->check_file_status_stmt);
     assert(err == SQLITE_DONE);
     sqlite3_reset(db->check_file_status_stmt);
 
@@ -236,11 +260,47 @@ void db_add_local_file(database* db, const wchar* file, time64 time)
     assert(err == SQLITE_OK);
     err = sqlite3_bind_int64(db->add_file_status_stmt, 3, time);
     assert(err == SQLITE_OK);
-    err = sqlite3_bind_int(db->add_file_status_stmt, 4, 0);
-    assert(err == SQLITE_OK);
 
     err = sqlite3_step(db->add_file_status_stmt);
     assert(err == SQLITE_DONE);
 
     sqlite3_reset(db->add_file_status_stmt);
+}
+
+void db_add_local_dir(database* db, const wchar* file)
+{
+    int err = sqlite3_bind_text16(db->add_scan_dir_stmt, 1, file, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->add_scan_dir_stmt);
+    assert(err == SQLITE_DONE);
+    
+    sqlite3_reset(db->add_scan_dir_stmt);
+}
+
+wchar* db_get_local_dir_copy(database* db)
+{
+    int err = sqlite3_step(db->check_scan_dir_stmt);
+    if(err == SQLITE_DONE)
+    {
+        sqlite3_reset(db->check_scan_dir_stmt);
+        return NULL;
+    }
+    assert(err == SQLITE_ROW);
+
+    const wchar* str = (wchar*)sqlite3_column_text16(db->check_scan_dir_stmt, 0);
+
+    wchar* ret = (wchar*)malloc(str_byte_length(str));
+    return str_copy(ret, str);
+}
+
+void db_remove_local_dir(database* db, const wchar* dir)
+{
+    int err = sqlite3_bind_text16(db->rm_scan_dir_stmt, 1, dir, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->rm_scan_dir_stmt);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->rm_scan_dir_stmt);
 }

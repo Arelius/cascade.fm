@@ -87,6 +87,12 @@ const wchar_t* sys_file_name(sys_dir_file* dir)
     return dir->full_path;
 }
 
+bool sys_is_directory(sys_dir_file* dir)
+{
+    assert(dir);
+    return dir->find.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+}
+
 bool sys_file_exists(const wchar_t* file)
 {
     return GetFileAttributesW(file) != 0xFFFFFFFF;
