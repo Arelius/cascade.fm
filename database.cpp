@@ -290,8 +290,9 @@ wchar* db_get_local_dir_copy(database* db)
 
     const wchar* str = (wchar*)sqlite3_column_text16(db->check_scan_dir_stmt, 0);
 
-    wchar* ret = (wchar*)malloc(str_byte_length(str));
-    return str_copy(ret, str);
+    wchar* ret = new wchar[str_byte_length(str) + char_term_len];
+    str_copy(ret, str);
+    return ret;
 }
 
 void db_remove_local_dir(database* db, const wchar* dir)

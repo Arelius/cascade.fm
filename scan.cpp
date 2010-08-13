@@ -29,6 +29,6 @@ void scan_all(database* db)
     {
         scan_directory(db, curr_dir);
         db_remove_local_dir(db, curr_dir);
-        free(curr_dir);
+        delete [] curr_dir;
     }
 }

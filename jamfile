@@ -1,6 +1,6 @@
 LINKFLAGS += user32.lib shell32.lib ;
 
-LINKFLAGS += /Zi ;
+LINKFLAGS += /DEBUG ;
 C++FLAGS += /Zi ;
 
 Main cascade : main.cpp sys_win32.cpp utf_16.cpp command_line.cpp database.cpp scan.cpp ext/sqlite3.c ; 
