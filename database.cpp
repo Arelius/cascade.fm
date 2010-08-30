@@ -31,6 +31,8 @@ struct database
     // db: file_status
     sqlite3_stmt* add_file_status_stmt;
     sqlite3_stmt* check_file_status_stmt;
+    sqlite3_stmt* get_file_status_stmt;
+    sqlite3_stmt* update_file_hash_stmt;
 
     // db: scan_directories
     sqlite3_stmt* add_scan_dir_stmt;
@@ -111,8 +113,16 @@ database* db_open(const wchar* db_file)
                             -1, &db->check_file_status_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
+                            L"SELECT filename, modified from file_status where hash_id IS NULL;",
+                            -1, &db->get_file_status_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
                             L"INSERT OR REPLACE INTO file_status (filename, hash_id, modified) VALUES (?, ?, ?);",
                             -1, &db->add_file_status_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"UPDATE file_status SET hash_id = ? WHERE filename == ?;",
+                            -1, &db->update_file_hash_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
                             L"INSERT OR IGNORE INTO scan_directories (directory) VALUES (?);",
@@ -132,7 +142,9 @@ database* db_open(const wchar* db_file)
 void db_close(database* db)
 {
     sqlite3_finalize(db->add_file_status_stmt);
+    sqlite3_finalize(db->get_file_status_stmt);
     sqlite3_finalize(db->check_file_status_stmt);
+    sqlite3_finalize(db->update_file_hash_stmt);
     sqlite3_close(db->db);
     delete db;
 }
@@ -231,6 +243,23 @@ void db_inject_library_directories(database* db)
     sqlite3_finalize(statement);
 }
 
+wchar* db_get_local_file_copy(database* db)
+{
+    int err = sqlite3_step(db->get_file_status_stmt);
+    wchar* ret = NULL;
+
+    if(err == SQLITE_ROW)
+    {
+        const wchar* file = (wchar*)sqlite3_column_text16(db->get_file_status_stmt, 0);
+        ret = new wchar[str_byte_length(file)+char_term_len];
+        str_copy(ret, file);
+    }
+
+    sqlite3_reset(db->get_file_status_stmt);
+    
+    return ret;
+}
+
 void db_add_local_file(database* db, const wchar* file, time64 time)
 {
     int err = sqlite3_bind_text16(db->check_file_status_stmt, 1, file, -1, SQLITE_TRANSIENT);
@@ -265,6 +294,21 @@ void db_add_local_file(database* db, const wchar* file, time64 time)
     assert(err == SQLITE_DONE);
 
     sqlite3_reset(db->add_file_status_stmt);
+}
+
+void db_add_local_file_hash(database* db, const wchar* file, const wchar* hash)
+{
+    int err = sqlite3_bind_text16(db->update_file_hash_stmt, 1, hash, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_bind_text16(db->update_file_hash_stmt, 2, file, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->update_file_hash_stmt);
+    
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->update_file_hash_stmt);
 }
 
 void db_add_local_dir(database* db, const wchar* file)

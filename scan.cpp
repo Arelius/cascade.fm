@@ -2,6 +2,8 @@
 #include "sys.h"
 #include "utf.h"
 
+#include <cstdio>
+
 // Load from DB.
 const wchar* scan_file_extensions[] =
 {
@@ -79,4 +81,16 @@ void scan_all(database* db)
         db_remove_local_dir(db, curr_dir);
         delete [] curr_dir;
     }
+}
+
+void hash_all(database* db)
+{
+    wchar* curr_file;
+
+    while((curr_file = db_get_local_file_copy(db)))
+    {
+        wprintf(L"File: %s\n", curr_file);
+        delete [] curr_file;
+    }
+    // ME!
 }

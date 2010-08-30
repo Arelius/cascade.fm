@@ -122,7 +122,10 @@ COMMAND_INFO(rm_path, 1, 1,
 int cmd_scan(int argc, wchar_t** argv)
 {
     database* db = db_open();
+
     scan_all(db);
+    hash_all(db);
+
     db_close(db);
     return 0;
 }
