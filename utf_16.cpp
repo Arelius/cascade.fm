@@ -7,6 +7,11 @@ wchar* char_next(wchar* str)
     return CharNextW(str);
 }
 
+const wchar* char_next(const wchar* str)
+{
+    return CharNextW(str);
+}
+
 size_t str_byte_length(const wchar* str)
 {
     return wcslen(str);
@@ -22,6 +27,11 @@ wchar* str_copy(wchar* dest, const wchar* src)
 int str_compare(const wchar* str1, const wchar* str2)
 {
     return wcscmp(str1, str2);
+}
+
+int str_icompare(const wchar* str1, const wchar* str2)
+{
+    return wcsicmp(str1, str2);
 }
 
 size_t char_length(const wchar* str)
