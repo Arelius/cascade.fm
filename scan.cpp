@@ -1,6 +1,7 @@
 #include "database.h"
 #include "sys.h"
 #include "utf.h"
+#include "ext/sha2.h"
 
 #include <cstdio>
 
@@ -83,14 +84,33 @@ void scan_all(database* db)
     }
 }
 
+const size_t BufLen = 16384;
+
 void hash_all(database* db)
 {
+    SHA256_CTX sha;
     wchar* curr_file;
+    unsigned char buffer[BufLen];
 
     while((curr_file = db_get_local_file_copy(db)))
     {
-        wprintf(L"File: %s\n", curr_file);
+        SHA256_Init(&sha);
+        size_t len = 0;
+        FILE* file = _wfopen(curr_file, L"rb");
+
+        while((len = fread(buffer, BufLen, 1, file)) > 0)
+        {
+            SHA256_Update(&sha, buffer, len);
+        }
+        
+        fclose(file);
+
+        SHA256_End(&sha, (char*)buffer);
+        wprintf(L"Sha2 (%s):", curr_file);
+        printf("%s\n", buffer);
+
+        db_add_local_file_hash(db, curr_file, (char*)buffer);
+        
         delete [] curr_file;
     }
-    // ME!
 }

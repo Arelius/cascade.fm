@@ -296,9 +296,9 @@ void db_add_local_file(database* db, const wchar* file, time64 time)
     sqlite3_reset(db->add_file_status_stmt);
 }
 
-void db_add_local_file_hash(database* db, const wchar* file, const wchar* hash)
+void db_add_local_file_hash(database* db, const wchar* file, const char* hash)
 {
-    int err = sqlite3_bind_text16(db->update_file_hash_stmt, 1, hash, -1, SQLITE_TRANSIENT);
+    int err = sqlite3_bind_text(db->update_file_hash_stmt, 1, hash, -1, SQLITE_TRANSIENT);
     assert(err == SQLITE_OK);
 
     err = sqlite3_bind_text16(db->update_file_hash_stmt, 2, file, -1, SQLITE_TRANSIENT);
