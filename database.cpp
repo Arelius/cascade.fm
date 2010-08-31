@@ -21,7 +21,7 @@ const wchar* dir_scan_schema =
     L"CREATE TABLE scan_directories (directory TEXT UNIQUE);";
 
 const wchar* song_info_schema =
-    L"CREATE TABLE song_info (id UNIQUE PRIMARY KEY, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally);";
+    L"CREATE TABLE song_info (id INTEGER PRIMARY KEY AUTOINCREMENT, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally INTEGER);";
 
 // These should be stored in the database object.
 struct database
@@ -33,6 +33,9 @@ struct database
     sqlite3_stmt* check_file_status_stmt;
     sqlite3_stmt* get_file_status_stmt;
     sqlite3_stmt* update_file_hash_stmt;
+
+    // db: song_info
+    sqlite3_stmt* add_song_hash_stmt;
 
     // db: scan_directories
     sqlite3_stmt* add_scan_dir_stmt;
@@ -121,8 +124,12 @@ database* db_open(const wchar* db_file)
                             -1, &db->add_file_status_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
-                            L"UPDATE file_status SET hash_id = ? WHERE filename == ?;",
+                            L"UPDATE file_status SET hash_id = (select id from song_info where hash = ?) WHERE filename == ?;",
                             -1, &db->update_file_hash_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"INSERT OR IGNORE INTO song_info (hash, exists_on_server, exists_locally) VALUES (?, ?, ?);",
+                            -1, &db->add_song_hash_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
                             L"INSERT OR IGNORE INTO scan_directories (directory) VALUES (?);",
@@ -145,6 +152,10 @@ void db_close(database* db)
     sqlite3_finalize(db->get_file_status_stmt);
     sqlite3_finalize(db->check_file_status_stmt);
     sqlite3_finalize(db->update_file_hash_stmt);
+    sqlite3_finalize(db->add_song_hash_stmt);
+    sqlite3_finalize(db->add_scan_dir_stmt);
+    sqlite3_finalize(db->rm_scan_dir_stmt);
+    sqlite3_finalize(db->check_scan_dir_stmt);
     sqlite3_close(db->db);
     delete db;
 }
@@ -243,6 +254,29 @@ void db_inject_library_directories(database* db)
     sqlite3_finalize(statement);
 }
 
+void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnClient)
+{
+    int err = sqlite3_bind_text(db->add_song_hash_stmt, 1, hash, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    if(bOnServer)
+        err = sqlite3_bind_int(db->add_song_hash_stmt, 2, (int)true);
+    else
+        err = sqlite3_bind_null(db->add_song_hash_stmt, 2);
+    assert(err == SQLITE_OK);
+
+    if(bOnClient)
+        err = sqlite3_bind_int(db->add_song_hash_stmt, 3, (int)true);
+    else
+        err = sqlite3_bind_null(db->add_song_hash_stmt, 3);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->add_song_hash_stmt);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->add_song_hash_stmt);
+}
+
 wchar* db_get_local_file_copy(database* db)
 {
     int err = sqlite3_step(db->get_file_status_stmt);
@@ -298,6 +332,8 @@ void db_add_local_file(database* db, const wchar* file, time64 time)
 
 void db_add_local_file_hash(database* db, const wchar* file, const char* hash)
 {
+    db_add_song_info(db, hash, false, true);
+
     int err = sqlite3_bind_text(db->update_file_hash_stmt, 1, hash, -1, SQLITE_TRANSIENT);
     assert(err == SQLITE_OK);
 
