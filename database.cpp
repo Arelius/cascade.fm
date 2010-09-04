@@ -36,6 +36,7 @@ struct database
 
     // db: song_info
     sqlite3_stmt* add_song_hash_stmt;
+    sqlite3_stmt* get_local_song_file_stmt;
 
     // db: scan_directories
     sqlite3_stmt* add_scan_dir_stmt;
@@ -132,6 +133,10 @@ database* db_open(const wchar* db_file)
                             -1, &db->add_song_hash_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
+                            L"SELECT file_status.filename FROM file_status JOIN song_info ON file_status.hash_id = song_info.id WHERE song_info.exists_on_server IS NOT 1;",
+                            -1, &db->get_local_song_file_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
                             L"INSERT OR IGNORE INTO scan_directories (directory) VALUES (?);",
                             -1, &db->add_scan_dir_stmt, NULL);
 
@@ -153,6 +158,7 @@ void db_close(database* db)
     sqlite3_finalize(db->check_file_status_stmt);
     sqlite3_finalize(db->update_file_hash_stmt);
     sqlite3_finalize(db->add_song_hash_stmt);
+    sqlite3_finalize(db->get_local_song_file_stmt);
     sqlite3_finalize(db->add_scan_dir_stmt);
     sqlite3_finalize(db->rm_scan_dir_stmt);
     sqlite3_finalize(db->check_scan_dir_stmt);
@@ -277,11 +283,30 @@ void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnCl
     sqlite3_reset(db->add_song_hash_stmt);
 }
 
+wchar* db_get_file_local_song_copy(database* db, wchar** out_hash)
+{
+    int err = sqlite3_step(db->get_local_song_file_stmt);
+    wchar* ret = NULL;
+
+    assert(err == SQLITE_ROW || err == SQLITE_DONE);
+    if(err == SQLITE_ROW)
+    {
+        const wchar* file = (wchar*)sqlite3_column_text16(db->get_local_song_file_stmt, 0);
+        ret = new wchar[str_byte_length(file)+char_term_len];
+        str_copy(ret, file);
+    }
+
+    sqlite3_reset(db->get_local_song_file_stmt);
+
+    return ret;
+}
+
 wchar* db_get_local_file_copy(database* db)
 {
     int err = sqlite3_step(db->get_file_status_stmt);
     wchar* ret = NULL;
 
+    assert(err == SQLITE_ROW || err == SQLITE_DONE);
     if(err == SQLITE_ROW)
     {
         const wchar* file = (wchar*)sqlite3_column_text16(db->get_file_status_stmt, 0);

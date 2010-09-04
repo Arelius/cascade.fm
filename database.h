@@ -3,6 +3,8 @@
 
 struct database;
 
+// *_copy functions return a string that will need to be delete[] 'ed
+
 database* db_open(const wchar* db_file = 0);
 void db_close(database* db);
 void db_init(database* db);
@@ -14,6 +16,7 @@ void db_inject_library_directories(database* db);
 
 // If false they are entered as NULL/UNKNOWN into the database.
 void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnClient);
+wchar* db_get_file_local_song_copy(database* db, wchar** out_hash);
 
 void db_add_local_file(database* db, const wchar* file, time64 time);
 wchar* db_get_local_file_copy(database* db);

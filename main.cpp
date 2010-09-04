@@ -2,13 +2,14 @@
 #include "command_line.h"
 #include "database.h"
 #include "scan.h"
+#include "sync.h"
 
 #include <sys/stat.h>
 #include <cstdio>
 #include <time.h>
 #include <assert.h>
 
-#define MAX_COMMANDS 6
+#define MAX_COMMANDS 7
 
 struct command_line
 {
@@ -134,6 +135,20 @@ COMMAND_INFO(scan, 0, 0,
              L"Begins scan of files in Library.",
              L"scan\n")
 
+int cmd_sync(int argc, wchar_t** argv)
+{
+    database* db = db_open();
+
+    sync_all(db);
+
+    db_close(db);
+    return 0;
+}
+
+COMMAND_INFO(sync, 0, 0,
+             L"Begins upload of local scanned files in Library.",
+             L"sync\n");
+
 int cmd_test(int argc, wchar_t** argv)
 {
     sys_dir_file* dir = sys_first_file(argv[1]);
@@ -163,6 +178,7 @@ void initialize_commands()
     cmd_add_path_info(i++);
     cmd_rm_path_info(i++);
     cmd_scan_info(i++);
+    cmd_sync_info(i++);
     num_commands = i;
 
     assert(num_commands <= MAX_COMMANDS);
