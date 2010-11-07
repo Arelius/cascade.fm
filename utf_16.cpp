@@ -12,9 +12,14 @@ const wchar* char_next(const wchar* str)
     return CharNextW(str);
 }
 
-size_t str_byte_length(const wchar* str)
+size_t str_length(const wchar* str)
 {
     return wcslen(str);
+}
+
+size_t str_byte_length(const wchar* str)
+{
+    return strlen(str);
 }
 
 // returns a pointer to the null termination character.

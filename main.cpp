@@ -9,7 +9,7 @@
 #include <time.h>
 #include <assert.h>
 
-#define MAX_COMMANDS 7
+#define MAX_COMMANDS 8
 
 struct command_line
 {
@@ -169,6 +169,14 @@ COMMAND_INFO(test, 1, 1,
              L"Test directory info.",
              L"test [file]\n\tfile - file/directory to get info on");
 
+int cmd_http(int argc, wchar_t** argv)
+{
+    
+}
+
+COMMAND_INFO(http, 1, 1,
+             L"http [URL]\n\tURL - URL to test connection to");
+
 void initialize_commands()
 {
     int i=0;
@@ -179,6 +187,7 @@ void initialize_commands()
     cmd_rm_path_info(i++);
     cmd_scan_info(i++);
     cmd_sync_info(i++);
+    cmd_http_info(i++)
     num_commands = i;
 
     assert(num_commands <= MAX_COMMANDS);
