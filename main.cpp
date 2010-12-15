@@ -9,7 +9,9 @@
 #include <time.h>
 #include <assert.h>
 
-#define MAX_COMMANDS 8
+#include "ext/sha2.h"
+
+#define MAX_COMMANDS 9
 
 struct command_line
 {
@@ -169,13 +171,33 @@ COMMAND_INFO(test, 1, 1,
              L"Test directory info.",
              L"test [file]\n\tfile - file/directory to get info on");
 
-int cmd_http(int argc, wchar_t** argv)
+int cmd_upload(int argc, wchar_t** argv)
 {
-    
+    void morgy_upload_file(const char*, const wchar*);
+    morgy_upload_file("", argv[1]);
+    return 0;
 }
 
-COMMAND_INFO(http, 1, 1,
-             L"http [URL]\n\tURL - URL to test connection to");
+COMMAND_INFO(upload, 1, 1,
+             L"Uploads a single file..",
+             L"upload [File]\n\tFile - File to upload.");
+
+int cmd_id(int argc, wchar_t** argv)
+{
+    unsigned char buffer[Hash_Buffer_Len];
+    if(!hash_file(argv[1], buffer))
+    {
+        wprintf(L"Problem opening file: %s.\n", argv[1]);
+        return 1;
+    }
+    wprintf(L"Sha2 (%s):", argv[1]);
+    printf("%s\n", buffer);
+    return 0;
+}
+
+COMMAND_INFO(id, 1, 1,
+             L"Return the hashed id for a file.",
+             L"id [Filename]\n\tFilename - File to print the id of.");
 
 void initialize_commands()
 {
@@ -187,7 +209,8 @@ void initialize_commands()
     cmd_rm_path_info(i++);
     cmd_scan_info(i++);
     cmd_sync_info(i++);
-    cmd_http_info(i++)
+    cmd_upload_info(i++);
+    cmd_id_info(i++);
     num_commands = i;
 
     assert(num_commands <= MAX_COMMANDS);

@@ -3,6 +3,8 @@
 #include "utf.h"
 #include "ext/sha2.h"
 
+#include "scan.h"
+
 #include <cstdio>
 
 // Load from DB.
@@ -84,13 +86,33 @@ void scan_all(database* db)
     }
 }
 
-const size_t BufLen = 16384;
+bool hash_file(wchar* filename, unsigned char* buffer)
+{
+    SHA256_CTX sha;
+    SHA256_Init(&sha);
+    size_t len = 0;
+    FILE* file = _wfopen(filename, L"rb");
+
+    if(!file)
+        return false;
+    
+    while((len = fread(buffer, 1, Hash_Buffer_Len, file)) > 0)
+    {
+        SHA256_Update(&sha, buffer, len);
+    }
+    
+    fclose(file);
+    
+    SHA256_End(&sha, (char*)buffer);
+
+    return true;
+}
 
 void hash_all(database* db)
 {
     SHA256_CTX sha;
     wchar* curr_file;
-    unsigned char buffer[BufLen];
+    unsigned char buffer[Hash_Buffer_Len];
 
     while((curr_file = db_get_local_file_copy(db)))
     {
@@ -98,7 +120,7 @@ void hash_all(database* db)
         size_t len = 0;
         FILE* file = _wfopen(curr_file, L"rb");
 
-        while((len = fread(buffer, BufLen, 1, file)) > 0)
+        while((len = fread(buffer, 1, Hash_Buffer_Len, file)) > 0)
         {
             SHA256_Update(&sha, buffer, len);
         }
