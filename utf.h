@@ -21,4 +21,6 @@ void char_inc(const wchar** str);
 bool char_is_alpha(const wchar* c);
 bool char_is_upper(const wchar* c);
 bool char_is_lower(const wchar* c);
+
+size_t utf16_to_utf8(char* dest, size_t buf_len, const wchar* src);
 #endif //_UTF_H_

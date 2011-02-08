@@ -25,3 +25,6 @@ void db_add_local_file_hash(database* db, const wchar* file, const char* hash);
 void db_add_local_dir(database* db, const wchar* file);
 wchar* db_get_local_dir_copy(database* db);
 void db_remove_local_dir(database* db, const wchar* dir);
+
+void db_set_session_id(database* db, const char* sessionid);
+wchar* db_get_session_id(database* db);

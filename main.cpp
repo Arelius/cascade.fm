@@ -3,6 +3,7 @@
 #include "database.h"
 #include "scan.h"
 #include "sync.h"
+#include "morgy.h"
 
 #include <sys/stat.h>
 #include <cstdio>
@@ -11,7 +12,7 @@
 
 #include "ext/sha2.h"
 
-#define MAX_COMMANDS 9
+#define MAX_COMMANDS 10
 
 struct command_line
 {
@@ -137,6 +138,18 @@ COMMAND_INFO(scan, 0, 0,
              L"Begins scan of files in Library.",
              L"scan\n")
 
+int cmd_login(int argc, wchar_t** argv)
+{
+    database* db = db_open(NULL);
+    morgy_login(argv[1], argv[2], db);
+    db_close(db);
+    return 0;
+}
+
+COMMAND_INFO(login, 2, 2,
+             L"Provides login authorization to the server",
+             L"login <username> <password>\n\tUsername - Login name.\n\tPassword - Login password.");
+
 int cmd_sync(int argc, wchar_t** argv)
 {
     database* db = db_open();
@@ -208,6 +221,7 @@ void initialize_commands()
     cmd_add_path_info(i++);
     cmd_rm_path_info(i++);
     cmd_scan_info(i++);
+    cmd_login_info(i++);
     cmd_sync_info(i++);
     cmd_upload_info(i++);
     cmd_id_info(i++);

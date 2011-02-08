@@ -1,6 +1,7 @@
 #include "utf.h"
 #include <Windows.h>
 #include <cstdio>
+#include <unicode/ustring.h>
 
 wchar* char_next(wchar* str)
 {
@@ -72,4 +73,14 @@ bool char_is_upper(const wchar* c)
 bool char_is_lower(const wchar* c)
 {
     return IsCharLower(*c);
+}
+
+// Can be called with dest==null and buf_len==0 and will return length.
+size_t utf16_to_utf8(char* dest, size_t buf_len, const wchar* src)
+{
+    UErrorCode err = U_ZERO_ERROR;
+    int dest_length;
+    u_strToUTF8(dest, buf_len, &dest_length, src, -1, &err);
+
+    return dest_length;
 }

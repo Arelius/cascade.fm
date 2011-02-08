@@ -6,11 +6,15 @@ void sync_all(database* db)
 {
     wchar* file;
     wchar* hash;
+    wchar* session_id = db_get_session_id(db);
 
     while(file = db_get_file_local_song_copy(db, &hash))
     {
-        // Upload file!
+        morgy_upload_file(hash, file, session_id);
         // Mark as uploaded.
         delete [] file;
+        delete [] hash;
     }
+
+    delete [] session_id;
 }
