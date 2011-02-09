@@ -304,7 +304,7 @@ wchar* db_get_file_local_song_copy(database* db, wchar** out_hash)
         {
             const wchar* hash = (wchar*)sqlite3_column_text16(db->get_local_song_file_stmt, 1);
             *out_hash = new wchar[str_byte_length(hash)+char_term_len];
-            str_copy(*out_hash, hash)
+            str_copy(*out_hash, hash);
         }
     }
 

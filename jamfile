@@ -2,4 +2,4 @@ LINKFLAGS += /DEBUG /LIBPATH:lib/curl/lib/LIB-Release /LIBPATH:lib/icu/lib /NODE
 LINKFLAGS += user32.lib shell32.lib libcurl.lib ws2_32.lib winmm.lib wldap32.lib icuuc.lib ;
 C++FLAGS += /Zi /Ilib/curl/include /Ilib/icu/include /DCURL_STATICLIB /MD ;
 
-Main cascade : main.cpp sys_win32.cpp utf_16.cpp command_line.cpp database.cpp scan.cpp sync.cpp morgy.cpp ext/sqlite3.c ext/sha2.c ; 
+Main cascade : main.cpp sys_win32.cpp utf_16.cpp command_line.cpp database.cpp scan.cpp sync.cpp ext/sqlite3.c ext/md5.c ; 

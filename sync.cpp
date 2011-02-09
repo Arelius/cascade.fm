@@ -10,7 +10,6 @@ void sync_all(database* db)
 
     while(file = db_get_file_local_song_copy(db, &hash))
     {
-        morgy_upload_file(hash, file, session_id);
         // Mark as uploaded.
         delete [] file;
         delete [] hash;

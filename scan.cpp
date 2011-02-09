@@ -1,7 +1,7 @@
 #include "database.h"
 #include "sys.h"
 #include "utf.h"
-#include "ext/sha2.h"
+#include "ext/md5.h"
 
 #include "scan.h"
 
@@ -88,47 +88,56 @@ void scan_all(database* db)
 
 bool hash_file(wchar* filename, unsigned char* buffer)
 {
-    SHA256_CTX sha;
-    SHA256_Init(&sha);
+    md5_state_t state;
+    md5_byte_t digest[16];
     size_t len = 0;
     FILE* file = _wfopen(filename, L"rb");
 
     if(!file)
         return false;
-    
+
+    md5_init(&state);
+
     while((len = fread(buffer, 1, Hash_Buffer_Len, file)) > 0)
     {
-        SHA256_Update(&sha, buffer, len);
+        md5_append(&state, buffer, len); 
     }
-    
+
     fclose(file);
-    
-    SHA256_End(&sha, (char*)buffer);
+
+    md5_finish(&state, digest);
+
+	for (int i = 0; i < 16; i++)
+	    sprintf((char*)buffer + i * 2, "%02x", digest[i]);
 
     return true;
 }
 
 void hash_all(database* db)
 {
-    SHA256_CTX sha;
+    md5_state_t state;
+    md5_byte_t digest[16];
+
     wchar* curr_file;
     unsigned char buffer[Hash_Buffer_Len];
 
     while((curr_file = db_get_local_file_copy(db)))
     {
-        SHA256_Init(&sha);
+        md5_init(&state);
         size_t len = 0;
         FILE* file = _wfopen(curr_file, L"rb");
 
         while((len = fread(buffer, 1, Hash_Buffer_Len, file)) > 0)
         {
-            SHA256_Update(&sha, buffer, len);
+            md5_append(&state, buffer, len); 
         }
         
         fclose(file);
 
-        SHA256_End(&sha, (char*)buffer);
-        wprintf(L"Sha2 (%s):", curr_file);
+        md5_finish(&state, digest);
+        for (int i = 0; i < 16; i++)
+            sprintf((char*)buffer + i * 2, "%02x", digest[i]);    
+        wprintf(L"MD5 (%s):", curr_file);
         printf("%s\n", buffer);
 
         db_add_local_file_hash(db, curr_file, (char*)buffer);

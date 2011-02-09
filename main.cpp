@@ -3,14 +3,11 @@
 #include "database.h"
 #include "scan.h"
 #include "sync.h"
-#include "morgy.h"
 
 #include <sys/stat.h>
 #include <cstdio>
 #include <time.h>
 #include <assert.h>
-
-#include "ext/sha2.h"
 
 #define MAX_COMMANDS 10
 
@@ -141,7 +138,6 @@ COMMAND_INFO(scan, 0, 0,
 int cmd_login(int argc, wchar_t** argv)
 {
     database* db = db_open(NULL);
-    morgy_login(argv[1], argv[2], db);
     db_close(db);
     return 0;
 }
@@ -186,8 +182,6 @@ COMMAND_INFO(test, 1, 1,
 
 int cmd_upload(int argc, wchar_t** argv)
 {
-    void morgy_upload_file(const char*, const wchar*);
-    morgy_upload_file("", argv[1]);
     return 0;
 }
 
@@ -203,7 +197,7 @@ int cmd_id(int argc, wchar_t** argv)
         wprintf(L"Problem opening file: %s.\n", argv[1]);
         return 1;
     }
-    wprintf(L"Sha2 (%s):", argv[1]);
+    wprintf(L"md5 (%s):", argv[1]);
     printf("%s\n", buffer);
     return 0;
 }
