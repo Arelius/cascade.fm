@@ -84,3 +84,14 @@ size_t utf16_to_utf8(char* dest, size_t buf_len, const wchar* src)
 
     return dest_length;
 }
+
+char* utf_16_to_8(const wchar* src) {
+    size_t len = utf16_to_utf8(NULL, 0, src);
+    char* buffer = (char*)malloc((len + 1) * sizeof(char));
+
+    utf16_to_utf8(buffer, len, src);
+
+    buffer[len] = '\0';
+
+    return buffer;
+}

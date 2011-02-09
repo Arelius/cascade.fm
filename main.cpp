@@ -182,12 +182,14 @@ COMMAND_INFO(test, 1, 1,
 
 int cmd_upload(int argc, wchar_t** argv)
 {
+    void audiobox_upload_file(const char* hash, const wchar* file_name, const wchar* userpass);
+    audiobox_upload_file("", argv[2], argv[1]); 
     return 0;
 }
 
-COMMAND_INFO(upload, 1, 1,
+COMMAND_INFO(upload, 2, 2,
              L"Uploads a single file..",
-             L"upload [File]\n\tFile - File to upload.");
+             L"upload [user:pass] [File]\n\tuser:pass - user and password in the form of user:pass\n\tFile - File to upload.");
 
 int cmd_id(int argc, wchar_t** argv)
 {
