@@ -150,15 +150,15 @@ int cmd_sync(int argc, wchar_t** argv)
 {
     database* db = db_open();
 
-    sync_all(db);
+    sync_all(db, argv[1]);
 
     db_close(db);
     return 0;
 }
 
-COMMAND_INFO(sync, 0, 0,
+COMMAND_INFO(sync, 1, 1,
              L"Begins upload of local scanned files in Library.",
-             L"sync\n");
+             L"sync [user:pass]\n\tuser:pass - user and password in the form of user:pass\n");
 
 int cmd_test(int argc, wchar_t** argv)
 {

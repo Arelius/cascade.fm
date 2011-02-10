@@ -2,11 +2,10 @@
 #include "utf.h"
 #include "database.h"
 
-void sync_all(database* db)
+void sync_all(database* db, const wchar* userpass)
 {
     wchar* file;
     wchar* hash;
-    wchar* session_id = db_get_session_id(db);
 
     while(file = db_get_file_local_song_copy(db, &hash))
     {
@@ -14,6 +13,4 @@ void sync_all(database* db)
         delete [] file;
         delete [] hash;
     }
-
-    delete [] session_id;
 }

@@ -9,7 +9,7 @@
 #include <shlobj.h>
 
 const wchar* db_file_name = L"music.cas";
-const wchar* db_app_data = L"\\Cascade\\";
+const wchar* db_app_data = L"\\Cascade.fm\\";
 
 const wchar* search_dir_schema =
     L"CREATE TABLE search_directories (directory TEXT UNIQUE);";
@@ -23,8 +23,6 @@ const wchar* dir_scan_schema =
 const wchar* song_info_schema =
     L"CREATE TABLE song_info (id INTEGER PRIMARY KEY AUTOINCREMENT, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally INTEGER);";
 
-const wchar* session_id_schema =
-    L"CREATE TABLE session_id (session TEXT UNIQUE);";
 
 // These should be stored in the database object.
 struct database
@@ -188,7 +186,6 @@ void db_init(database* db)
     db_run_schema(db, file_status_schema);
     db_run_schema(db, dir_scan_schema);
     db_run_schema(db, song_info_schema);
-    db_run_schema(db, session_id_schema);
 }
 
 void db_add_search_dir(database* db, const wchar* dir)
@@ -423,63 +420,3 @@ void db_remove_local_dir(database* db, const wchar* dir)
     sqlite3_reset(db->rm_scan_dir_stmt);
 }
 
-void db_set_session_id(database* db, const char* sessionid)
-{
-    sqlite3_stmt* statement;
-
-    // Clear the table.
-
-    int err = sqlite3_prepare16(db->db,
-                                L"DELETE FROM session_id;",
-                                -1, &statement, NULL);
-    assert(err == SQLITE_OK);
-    err = sqlite3_step(statement);
-    assert(err == SQLITE_DONE);
-
-    sqlite3_finalize(statement);
-
-    err = sqlite3_prepare16(db->db,
-                                L"INSERT INTO session_id VALUES(?);",
-                                -1, &statement, NULL);
-    assert(err == SQLITE_OK);
-
-    err = sqlite3_bind_text(statement, 1, sessionid, -1, SQLITE_TRANSIENT);
-    assert(err == SQLITE_OK);
-
-    err = sqlite3_step(statement);
-    assert(err == SQLITE_DONE);
-
-    sqlite3_finalize(statement);
-
-
-}
-
-// Calling this function seems to make closing the db crash!!!!
-wchar* db_get_session_id/*_copy*/(database* db)
-{
-    sqlite3_stmt* statement;
-
-    int err = sqlite3_prepare16(db->db,
-                                L"SELECT session FROM session_id;",
-                                -1, &statement, NULL);
-
-    assert(err == SQLITE_OK);
-
-    err = sqlite3_step(statement);
-
-    wchar* ret = NULL;
-
-    assert(err == SQLITE_ROW || err == SQLITE_DONE);
-    if(err == SQLITE_ROW)
-    {
-        const wchar* session = (wchar*)sqlite3_column_text16(statement, 0);
-        ret = new wchar[str_byte_length(session)+char_term_len];
-        str_copy(ret, session);
-    }
-
-    err = sqlite3_finalize(statement);
-
-    assert(err == SQLITE_OK);
-
-    return ret;
-}
