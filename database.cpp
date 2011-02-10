@@ -37,6 +37,7 @@ struct database
 
     // db: song_info
     sqlite3_stmt* add_song_hash_stmt;
+    sqlite3_stmt* update_exists_on_server_stmt;
     sqlite3_stmt* get_local_song_file_stmt;
 
     // db: scan_directories
@@ -134,6 +135,10 @@ database* db_open(const wchar* db_file)
                             -1, &db->add_song_hash_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
+                            L"UPDATE song_info SET exists_on_server = ? WHERE hash = ?;",
+                            -1, &db->update_exists_on_server_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
                             L"SELECT file_status.filename, song_info.hash FROM file_status JOIN song_info ON file_status.hash_id = song_info.id WHERE song_info.exists_on_server IS NOT 1;",
                             -1, &db->get_local_song_file_stmt, NULL);
 
@@ -159,6 +164,7 @@ void db_close(database* db)
     sqlite3_finalize(db->check_file_status_stmt);
     sqlite3_finalize(db->update_file_hash_stmt);
     sqlite3_finalize(db->add_song_hash_stmt);
+    sqlite3_finalize(db->update_exists_on_server_stmt);
     sqlite3_finalize(db->get_local_song_file_stmt);
     sqlite3_finalize(db->add_scan_dir_stmt);
     sqlite3_finalize(db->rm_scan_dir_stmt);
@@ -285,7 +291,26 @@ void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnCl
     sqlite3_reset(db->add_song_hash_stmt);
 }
 
-wchar* db_get_file_local_song_copy(database* db, wchar** out_hash)
+void db_update_song_server_status(database* db, const char* hash, bool bOnServer)
+{
+    int err;
+   
+    if(bOnServer)
+        err = sqlite3_bind_int(db->update_exists_on_server_stmt, 1, (int)true);
+    else
+        err = sqlite3_bind_null(db->update_exists_on_server_stmt, 1);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_bind_text(db->update_exists_on_server_stmt, 2, hash, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->update_exists_on_server_stmt);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->update_exists_on_server_stmt);
+}
+
+wchar* db_get_file_local_song_copy(database* db, char** out_hash)
 {
     int err = sqlite3_step(db->get_local_song_file_stmt);
     wchar* ret = NULL;
@@ -299,9 +324,9 @@ wchar* db_get_file_local_song_copy(database* db, wchar** out_hash)
 
         if(out_hash)
         {
-            const wchar* hash = (wchar*)sqlite3_column_text16(db->get_local_song_file_stmt, 1);
-            *out_hash = new wchar[str_byte_length(hash)+char_term_len];
-            str_copy(*out_hash, hash);
+            const char* hash = (char*)sqlite3_column_text(db->get_local_song_file_stmt, 1);
+            *out_hash = new char[strlen(hash)+1];
+            strcpy(*out_hash, hash);
         }
     }
 

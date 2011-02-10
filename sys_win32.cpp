@@ -72,7 +72,9 @@ void sys_close_dir(sys_dir_file* dir)
     {
         FindClose(dir->hand);
         delete dir->dir;
+        dir->dir = NULL;
         delete dir->full_path;
+        dir->full_path = NULL;
         delete dir;
     }
 }

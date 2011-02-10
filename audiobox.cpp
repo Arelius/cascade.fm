@@ -49,14 +49,14 @@ bool audiobox_check_exists_hash(const char* hash, const wchar* userpass)
     return r == CURLE_OK;
 }
 
-void audiobox_upload_file(const wchar* file_name, const wchar* userpass)
+bool audiobox_upload_file(const wchar* file_name, const wchar* userpass)
 {
 
     // Bail early if already uploaded.
     char hash[Hash_Buffer_Len];
     hash_file(file_name, hash);
     if(audiobox_check_exists_hash(hash, userpass))
-        return;
+        return true;
 
     CURL* curl = curl_easy_init();
     assert(curl);
@@ -64,6 +64,7 @@ void audiobox_upload_file(const wchar* file_name, const wchar* userpass)
     struct curl_httppost* post = NULL;
     struct curl_httppost* last = NULL;
 
+    //FIXME: It's unlikely that CURLFORM_FILE will handle unicode filenames well.
     char* file_name_8 = utf_16_to_8(file_name);
     char* userpass_8 = utf_16_to_8(userpass);
     scope_free(file_name_8);
@@ -78,6 +79,8 @@ void audiobox_upload_file(const wchar* file_name, const wchar* userpass)
     curl_easy_setopt(curl, CURLOPT_POST, TRUE);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
 
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, true);
+
     CURLcode r = curl_easy_perform(curl);
     if(r != CURLE_OK)
     {
@@ -86,5 +89,7 @@ void audiobox_upload_file(const wchar* file_name, const wchar* userpass)
 
     //r = curl_easy_recv(curl, 
 
-    curl_easy_cleanup(curl);   
+    curl_easy_cleanup(curl);
+
+    return r == CURLE_OK;
 }

@@ -3,6 +3,7 @@
 #include "database.h"
 #include "scan.h"
 #include "sync.h"
+#include "audiobox.h"
 
 #include <sys/stat.h>
 #include <cstdio>
@@ -182,9 +183,7 @@ COMMAND_INFO(test, 1, 1,
 
 int cmd_upload(int argc, wchar_t** argv)
 {
-    void audiobox_upload_file(const wchar* file_name, const wchar* userpass);
-    audiobox_upload_file(argv[2], argv[1]); 
-    return 0;
+    return !audiobox_upload_file(argv[2], argv[1]); 
 }
 
 COMMAND_INFO(upload, 2, 2,
