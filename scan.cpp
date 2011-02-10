@@ -86,7 +86,7 @@ void scan_all(database* db)
     }
 }
 
-bool hash_file(wchar* filename, unsigned char* buffer)
+bool hash_file(const wchar* filename, char* buffer)
 {
     md5_state_t state;
     md5_byte_t digest[16];
@@ -98,9 +98,9 @@ bool hash_file(wchar* filename, unsigned char* buffer)
 
     md5_init(&state);
 
-    while((len = fread(buffer, 1, Hash_Buffer_Len, file)) > 0)
+    while((len = fread((unsigned char*)buffer, 1, Hash_Buffer_Len, file)) > 0)
     {
-        md5_append(&state, buffer, len); 
+        md5_append(&state, (unsigned char*)buffer, len); 
     }
 
     fclose(file);
@@ -108,7 +108,7 @@ bool hash_file(wchar* filename, unsigned char* buffer)
     md5_finish(&state, digest);
 
 	for (int i = 0; i < 16; i++)
-	    sprintf((char*)buffer + i * 2, "%02x", digest[i]);
+	    sprintf(buffer + i * 2, "%02x", digest[i]);
 
     return true;
 }

@@ -182,8 +182,8 @@ COMMAND_INFO(test, 1, 1,
 
 int cmd_upload(int argc, wchar_t** argv)
 {
-    void audiobox_upload_file(const char* hash, const wchar* file_name, const wchar* userpass);
-    audiobox_upload_file("", argv[2], argv[1]); 
+    void audiobox_upload_file(const wchar* file_name, const wchar* userpass);
+    audiobox_upload_file(argv[2], argv[1]); 
     return 0;
 }
 
@@ -193,7 +193,7 @@ COMMAND_INFO(upload, 2, 2,
 
 int cmd_id(int argc, wchar_t** argv)
 {
-    unsigned char buffer[Hash_Buffer_Len];
+    char buffer[Hash_Buffer_Len];
     if(!hash_file(argv[1], buffer))
     {
         wprintf(L"Problem opening file: %s.\n", argv[1]);
