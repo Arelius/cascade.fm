@@ -40,13 +40,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;lib\curl\include&quot;;&quot;lib\icu\include&quot;"
+				AdditionalIncludeDirectories="&quot;lib\curl\include&quot;;&quot;lib\icu\include&quot;;&quot;.&quot;"
 				PreprocessorDefinitions="CURL_STATICLIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				ForcedIncludeFiles=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -113,12 +114,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;lib\curl\include&quot;;&quot;lib\icu\include&quot;"
+				AdditionalIncludeDirectories="&quot;lib\curl\include&quot;;&quot;lib\icu\include&quot;;&quot;.&quot;"
 				PreprocessorDefinitions="CURL_STATICLIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				ForcedIncludeFiles=""
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -172,34 +174,182 @@
 			<File
 				RelativePath=".\audiobox.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\command_line.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\database.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\main.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\mem_tools.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\scan.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\sync.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\sys_win32.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\utf_16.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ForcedIncludeFiles="mem_tools.h"
+					/>
+				</FileConfiguration>
 			</File>
 			<Filter
 				Name="ext"
