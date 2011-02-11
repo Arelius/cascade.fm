@@ -17,8 +17,8 @@ void sys_fill_path(sys_dir_file* dir)
     if(dir->full_path)
         delete dir->full_path;
     dir->full_path = new wchar[
-        str_byte_length(dir->find.cFileName) +
-        str_byte_length(dir->dir) +
+        str_length(dir->find.cFileName) +
+        str_length(dir->dir) +
         char_term_len + 1];
 
     str_copy(
@@ -36,7 +36,7 @@ sys_dir_file* sys_first_file(const wchar_t* dir)
 
     sys_dir_file* ret = new sys_dir_file();
     
-    ret->dir = new wchar[str_byte_length(dir) + char_term_len];
+    ret->dir = new wchar[str_length(dir) + char_term_len];
     str_copy(ret->dir, dir);
     ret->full_path = NULL;
 

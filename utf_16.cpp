@@ -18,11 +18,6 @@ size_t str_length(const wchar* str)
     return wcslen(str);
 }
 
-size_t str_byte_length(const wchar* str)
-{
-    return strlen((const char*)str);
-}
-
 // returns a pointer to the null termination character.
 wchar* str_copy(wchar* dest, const wchar* src)
 {

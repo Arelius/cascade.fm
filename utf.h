@@ -11,7 +11,6 @@ wchar* char_next(wchar* str);
 const wchar* char_next(const wchar* str);
 size_t char_length(const wchar* str);
 size_t str_length(const wchar* str);
-size_t str_byte_length(const wchar* str);
 wchar* str_copy(wchar* dest, const wchar* src);
 int str_compare(const wchar* str1, const wchar* str2);
 int str_icompare(const wchar* str1, const wchar* str2);

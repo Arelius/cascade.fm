@@ -319,7 +319,8 @@ wchar* db_get_file_local_song_copy(database* db, char** out_hash)
     if(err == SQLITE_ROW)
     {
         const wchar* file = (wchar*)sqlite3_column_text16(db->get_local_song_file_stmt, 0);
-        ret = new wchar[str_byte_length(file)+char_term_len];
+        size_t len = str_length(file)+char_term_len;
+        ret = new wchar[len];
         str_copy(ret, file);
 
         if(out_hash)
@@ -344,7 +345,7 @@ wchar* db_get_local_file_copy(database* db)
     if(err == SQLITE_ROW)
     {
         const wchar* file = (wchar*)sqlite3_column_text16(db->get_file_status_stmt, 0);
-        ret = new wchar[str_byte_length(file)+char_term_len];
+        ret = new wchar[str_length(file)+char_term_len];
         str_copy(ret, file);
     }
 
@@ -429,7 +430,7 @@ wchar* db_get_local_dir_copy(database* db)
 
     const wchar* str = (wchar*)sqlite3_column_text16(db->check_scan_dir_stmt, 0);
 
-    wchar* ret = new wchar[str_byte_length(str) + char_term_len];
+    wchar* ret = new wchar[str_length(str) + char_term_len];
     str_copy(ret, str);
     return ret;
 }
