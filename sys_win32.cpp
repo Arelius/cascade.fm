@@ -59,7 +59,11 @@ sys_dir_file* sys_first_file(const wchar_t* dir)
         while(str_compare(ret->find.cFileName, L".") == 0 ||
               str_compare(ret->find.cFileName, L"..") == 0)
         {
-            sys_next_file(ret);
+            if(sys_next_file(ret) == false)
+            {
+                delete ret; 
+                return NULL;
+            }
         }
     }
 

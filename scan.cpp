@@ -81,6 +81,7 @@ void scan_all(database* db)
     while((curr_dir = db_get_local_dir_copy(db)))
     {
         scan_directory(db, curr_dir);
+        wprintf(L"Scanning directory: %s\n", curr_dir);
         db_remove_local_dir(db, curr_dir);
         delete [] curr_dir;
     }
