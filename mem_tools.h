@@ -1,3 +1,5 @@
+// Copyright (c) 2011, Nicholas "Indy" Ray. All rights reserved.
+// See the LICENSE file for usage, modification, and distribution terms.
 #ifndef _MEM_TOOLS_H_
 #define _MEM_TOOLS_H_
 

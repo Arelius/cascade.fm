@@ -1,3 +1,5 @@
+// Copyright (c) 2011, Nicholas "Indy" Ray. All rights reserved.
+// See the LICENSE file for usage, modification, and distribution terms.
 #include "quick_string.h"
 #include "sys.h"
 

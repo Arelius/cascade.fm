@@ -1,3 +1,5 @@
+// Copyright (c) 2011, Nicholas "Indy" Ray. All rights reserved.
+// See the LICENSE file for usage, modification, and distribution terms.
 #include <curl/curl.h>
 #include <assert.h>
 #include "utf.h"
