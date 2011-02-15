@@ -23,6 +23,8 @@ void sync_all(database* db, const wchar* userpass)
         }
         else
         {
+            // On failure, decrease priority, so we can get around to uploading other things.
+            db_adjust_song_upload_priority(db, hash, -1);
             wprintf(L"Failure uploading file: %s\n", file);
         }
         // Mark as uploaded.

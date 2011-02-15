@@ -23,7 +23,7 @@ const wchar* dir_scan_schema =
     L"CREATE TABLE scan_directories (directory TEXT UNIQUE);";
 
 const wchar* song_info_schema =
-    L"CREATE TABLE song_info (id INTEGER PRIMARY KEY AUTOINCREMENT, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally INTEGER);";
+    L"CREATE TABLE song_info (id INTEGER PRIMARY KEY AUTOINCREMENT, hash TEXT UNIQUE, exists_on_server INTEGER, exists_locally INTEGER, upload_priority INTEGER DEFAULT 50);";
 
 
 // These should be stored in the database object.
@@ -41,6 +41,7 @@ struct database
     sqlite3_stmt* add_song_hash_stmt;
     sqlite3_stmt* update_exists_on_server_stmt;
     sqlite3_stmt* get_local_song_file_stmt;
+    sqlite3_stmt* adjust_upload_priority_stmt;
 
     // db: scan_directories
     sqlite3_stmt* add_scan_dir_stmt;
@@ -141,8 +142,12 @@ database* db_open(const wchar* db_file)
                             -1, &db->update_exists_on_server_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
-                            L"SELECT file_status.filename, song_info.hash FROM file_status JOIN song_info ON file_status.hash_id = song_info.id WHERE song_info.exists_on_server IS NOT 1;",
+                            L"SELECT file_status.filename, song_info.hash FROM file_status JOIN song_info ON file_status.hash_id = song_info.id WHERE song_info.exists_on_server IS NOT 1 ORDER BY song_info.upload_priority ASC;",
                             -1, &db->get_local_song_file_stmt, NULL);
+
+    err = sqlite3_prepare16(db->db,
+                            L"UPDATE song_info SET upload_priority = max(0, min(100, upload_priority + ?)) WHERE hash = ?",
+                            -1, &db->adjust_upload_priority_stmt, NULL);
 
     err = sqlite3_prepare16(db->db,
                             L"INSERT OR IGNORE INTO scan_directories (directory) VALUES (?);",
@@ -168,6 +173,7 @@ void db_close(database* db)
     sqlite3_finalize(db->add_song_hash_stmt);
     sqlite3_finalize(db->update_exists_on_server_stmt);
     sqlite3_finalize(db->get_local_song_file_stmt);
+    sqlite3_finalize(db->adjust_upload_priority_stmt);
     sqlite3_finalize(db->add_scan_dir_stmt);
     sqlite3_finalize(db->rm_scan_dir_stmt);
     sqlite3_finalize(db->check_scan_dir_stmt);
@@ -336,6 +342,22 @@ wchar* db_get_file_local_song_copy(database* db, char** out_hash)
     sqlite3_reset(db->get_local_song_file_stmt);
 
     return ret;
+}
+
+void db_adjust_song_upload_priority(database* db, const char* hash, int increase)
+{
+    int err;
+
+    err = sqlite3_bind_int(db->adjust_upload_priority_stmt, 1, -1 * increase);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_bind_text(db->adjust_upload_priority_stmt, 2, hash, -1, SQLITE_TRANSIENT);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(db->adjust_upload_priority_stmt);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_reset(db->adjust_upload_priority_stmt);
 }
 
 wchar* db_get_local_file_copy(database* db)

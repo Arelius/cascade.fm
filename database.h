@@ -20,6 +20,7 @@ void db_inject_library_directories(database* db);
 void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnClient);
 void db_update_song_server_status(database* db, const char* hash, bool bOnServer);
 wchar* db_get_file_local_song_copy(database* db, char** out_hash);
+void db_adjust_song_upload_priority(database* db, const char* hash, int increase);
 
 void db_add_local_file(database* db, const wchar* file, time64 time);
 wchar* db_get_local_file_copy(database* db);
