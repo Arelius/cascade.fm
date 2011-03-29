@@ -18,6 +18,7 @@ void db_inject_library_directories(database* db);
 
 // If false they are entered as NULL/UNKNOWN into the database.
 void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnClient);
+void db_clear_song_server_status(database* db);
 void db_update_song_server_status(database* db, const char* hash, bool bOnServer);
 wchar* db_get_file_local_song_copy(database* db, char** out_hash);
 void db_adjust_song_upload_priority(database* db, const char* hash, int increase);

@@ -12,7 +12,7 @@
 #include <time.h>
 #include <assert.h>
 
-#define MAX_COMMANDS 10
+#define MAX_COMMANDS 11
 
 struct command_line
 {
@@ -123,6 +123,18 @@ COMMAND_INFO(rm_path, 1, 1,
              L"Removes directories from Library.",
              L"rm_path [dir]\n\tdir - directory to remove from path, supports wildcards")
 
+int cmd_reset_sync(int argc, wchar_t** argv)
+{
+    database* db = db_open();
+    db_clear_song_server_status(db);
+    db_close(db);
+    return 0;
+}
+
+COMMAND_INFO(reset_sync, 0, 0,
+             L"Resets server sync status.",
+             L"reset_sync");
+
 int cmd_scan(int argc, wchar_t** argv)
 {
     database* db = db_open();
@@ -217,6 +229,7 @@ void initialize_commands()
     cmd_show_library_info(i++);
     cmd_add_path_info(i++);
     cmd_rm_path_info(i++);
+    cmd_reset_sync_info(i++);
     cmd_scan_info(i++);
     cmd_login_info(i++);
     cmd_sync_info(i++);

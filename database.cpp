@@ -299,6 +299,20 @@ void db_add_song_info(database* db, const char* hash, bool bOnServer, bool bOnCl
     sqlite3_reset(db->add_song_hash_stmt);
 }
 
+void db_clear_song_server_status(database* db)
+{
+    sqlite3_stmt* statement;
+    int err = sqlite3_prepare16(db->db,
+                                L"UPDATE song_info SET exists_on_server = NULL;",
+                                -1, &statement, NULL);
+    assert(err == SQLITE_OK);
+
+    err = sqlite3_step(statement);
+    assert(err == SQLITE_DONE);
+
+    sqlite3_finalize(statement);
+}
+
 void db_update_song_server_status(database* db, const char* hash, bool bOnServer)
 {
     int err;
